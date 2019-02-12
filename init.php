@@ -1,14 +1,14 @@
 <?php
+// based on https://github.com/HenryQW/mercury_fulltext
 class mercury_fulltext extends Plugin
-
 	{
 	private $host;
 	function about()
 		{
 		return array(
-			1.0,
+			1.1,
 			"Try to get fulltext of the article using Mercury Parser",
-			"https://github.com/HenryQW/mercury_fulltext/"
+			"https://github.com/jamespo/mercury_fulltext/"
 		);
 		}
 
@@ -21,8 +21,8 @@ class mercury_fulltext extends Plugin
 
 	function save()
 		{
-		$this->host->set($this, "mercury_API", $_POST["mercury_API"]);
-		echo __("API key saved.");
+		$this->host->set($this, "mercury_HOSTNAME", $_POST["mercury_HOSTNAME"]);
+		echo __("Mercury hostname saved.");
 		}
 
 	function init($host)
@@ -64,9 +64,9 @@ class mercury_fulltext extends Plugin
 		print_hidden("op", "pluginhandler");
 		print_hidden("method", "save");
 		print_hidden("plugin", "mercury_fulltext");
-		$mercury_API = $this->host->get($this, "mercury_API");
-		print "<input dojoType='dijit.form.ValidationTextBox' required='1' name='mercury_API' value='" . $mercury_API . "'/>";
-		print "&nbsp;<label for=\"mercury_API\">" . __("Postlight has stopped providing new API key, you can continue using your current API key.") . "</label>";
+		$mercury_HOSTNAME = $this->host->get($this, "mercury_HOSTNAME");
+		print "<input dojoType='dijit.form.ValidationTextBox' required='1' name='mercury_HOSTNAME' value='" . $mercury_HOSTNAME . "'/>";
+		print "&nbsp;<label for=\"mercury_HOSTNAME\">" . __("URL of your Mercury API server, eg http://localhost:3000") . "</label>";
 		print "<p>";
 		print_button("submit", __("Save"));
 		print "</form>";
@@ -141,11 +141,10 @@ class mercury_fulltext extends Plugin
 		{
 		$ch = curl_init();
 		$url = $article['link'];
-		$api_key = $this->host->get($this, "mercury_API");
+		$mercury_hostname = $this->host->get($this, "mercury_HOSTNAME");
 		$request_headers = array();
-		$request_headers[] = 'x-api-key: ' . $api_key;
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($ch, CURLOPT_URL, 'https://mercury.postlight.com/parser?url=' . $url);
+		curl_setopt($ch, CURLOPT_URL, $mercury_hostname . '/parser?url=' . $url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);
 		curl_setopt($ch, CURLOPT_ENCODING, "UTF-8");
